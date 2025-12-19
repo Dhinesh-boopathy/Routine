@@ -1,4 +1,6 @@
 import { Router } from "express";
+import mongoose from "mongoose";
+
 import RoutineTemplate from "../models/RoutineTemplate.js";
 
 const router = Router();
@@ -38,5 +40,40 @@ router.post("/seed-default", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+router.get("/active", async (req, res) => {
+  try {
+    const { userId } = req.query;
+    let routine = null;
+
+    // ✅ Only query user routine if ObjectId is valid
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      routine = await RoutineTemplate.findOne({
+        userId,
+        isActive: true,
+      });
+    }
+
+    // 🔁 Fallback to system default
+    if (!routine) {
+      routine = await RoutineTemplate.findOne({
+        userId: null,
+        isActive: true,
+      });
+    }
+
+    if (!routine) {
+      return res.status(404).json({
+        message: "No routine found",
+      });
+    }
+
+    res.status(200).json(routine);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 export default router;

@@ -7,25 +7,42 @@ import Confetti from "../components/Confetti.jsx";
 import DayCompletedCard from "../components/DayCompletedCard.jsx";
 import ProgressBar from "../components/ProgressBar.jsx";
 
-const DEFAULT_TASKS = [
-  { id: 1, title: "Wake up early", description: "Before 7:00 AM", done: false },
-  { id: 2, title: "Study / Learn 30 minutes", description: "Skill or reading", done: false },
-  { id: 3, title: "Avoid unnecessary spending", description: "No impulse purchases", done: false },
-  { id: 4, title: "Exercise or walk", description: "15–30 mins for health", done: false },
-  { id: 5, title: "Save a small amount", description: "Even ₹10 counts", done: false },
-  { id: 6, title: "Reflect for 5 minutes", description: "Think about your day", done: false },
-];
+const API_BASE = "http://localhost:4000";
+
 
 export default function Routine() {
   const navigate = useNavigate();
 
-const [tasks, setTasks] = useState(() => {
-  const custom = localStorage.getItem("customRoutine");
-  if (custom) return JSON.parse(custom);
+const [tasks, setTasks] = useState([]);
+useEffect(() => {
+  async function fetchRoutine() {
+    try {
+      const res = await fetch(`${API_BASE}/routine/active`);
+      const routine = await res.json();
 
-  const saved = localStorage.getItem("routineTasks");
-  return saved ? JSON.parse(saved) : DEFAULT_TASKS;
-});
+      const formattedTasks = routine.tasks.map((t, index) => ({
+        id: index + 1,
+        title: t.title,
+        description: t.description || "",
+        done: false,
+      }));
+
+      setTasks(formattedTasks);
+      localStorage.setItem("routineTasks", JSON.stringify(formattedTasks));
+    } catch (err) {
+      console.error("Failed to fetch routine:", err);
+
+      // fallback (offline / backend down)
+      const cached = localStorage.getItem("routineTasks");
+      if (cached) {
+        setTasks(JSON.parse(cached));
+      }
+    }
+  }
+
+  fetchRoutine();
+}, []);
+
 
 
   const [history, setHistory] = useState(() => {
@@ -123,7 +140,7 @@ const [tasks, setTasks] = useState(() => {
         return copy;
       });
 
-      setTasks(DEFAULT_TASKS.map((t) => ({ ...t, done: false })));
+     setTasks((prev) => prev.map((t) => ({ ...t, done: false })));
       setTodayCompleted(false);
       setLastDate(key);
     } else {
