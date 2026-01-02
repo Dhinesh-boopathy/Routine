@@ -3,18 +3,22 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import routineRoute from "./routes/routineRoute.js";
+import progressRoutes from "./routes/progressRoute.js";
+import authRoutes from "./routes/authRoute.js"; 
 
 
 dotenv.config();
 
 const app = express();
-
+  
 // middlewares
 app.use(cors());
 app.use(express.json());
+ 
+app.use("/auth", authRoutes);
 
 app.use("/routine", routineRoute);
-
+app.use("/progress", progressRoutes);
 // health route
 app.get("/health", (req, res) => {
   res.json({

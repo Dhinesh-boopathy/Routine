@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { getProgressTheme } from "../utils/progressTheme";
 
 export default function StreakCard({
@@ -6,9 +7,31 @@ export default function StreakCard({
   progress,
   onClick,
 }) {
-  // ✅ Single source of truth
   const theme = getProgressTheme(progress);
 
+  const prevStreak = useRef(streak);
+  const [animateStreak, setAnimateStreak] = useState(false);
+
+  /* -------------------- STREAK ANIMATION -------------------- */
+  useEffect(() => {
+    if (streak > prevStreak.current) {
+      setAnimateStreak(true);
+
+      const timer = setTimeout(() => {
+        setAnimateStreak(false);
+      }, 600);
+
+      return () => clearTimeout(timer);
+    }
+
+    prevStreak.current = streak;
+  }, [streak]);
+
+  useEffect(() => {
+    prevStreak.current = streak;
+  }, []);
+
+  /* -------------------- HELPERS -------------------- */
   const getMessage = () => {
     if (progress === 0) return "Start your day";
     if (progress === 100) return "Perfect day 🎉";
@@ -18,15 +41,25 @@ export default function StreakCard({
   const RADIUS = 88;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
+  /* -------------------- UI -------------------- */
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
+      className="bg-white rounded-xl shadow-md p-6
+                 flex flex-col items-center
+                 cursor-pointer hover:shadow-lg transition"
     >
       {/* 🌟 GLOW BACKGROUND */}
       <div className="relative w-48 h-48 mb-4 flex items-center justify-center">
         <div
-          className={`absolute w-40 h-40 rounded-full blur-2xl ${theme.glow}`}
+          className={`absolute w-40 h-40 rounded-full blur-2xl
+                      transition-all duration-500
+                      ${theme.glow}
+                      ${
+                        animateStreak
+                          ? "scale-110 opacity-100"
+                          : "scale-100 opacity-70"
+                      }`}
         />
 
         {/* 🔵 PROGRESS CIRCLE */}
@@ -65,13 +98,29 @@ export default function StreakCard({
 
       {/* 📊 STATS */}
       <div className="flex gap-6 text-center">
-        <div>
-          <p className="text-lg font-semibold">{streak}</p>
-          <p className="text-xs text-slate-500">Current Streak</p>
+        <div
+          className={`transition-transform duration-300
+                      ${
+                        animateStreak
+                          ? "scale-125 text-orange-600"
+                          : "scale-100"
+                      }`}
+        >
+          <p className="text-lg font-semibold">
+            🔥 {streak}
+          </p>
+          <p className="text-xs text-slate-500">
+            Current Streak
+          </p>
         </div>
+
         <div>
-          <p className="text-lg font-semibold">{bestStreak}</p>
-          <p className="text-xs text-slate-500">Best Streak</p>
+          <p className="text-lg font-semibold">
+            {bestStreak}
+          </p>
+          <p className="text-xs text-slate-500">
+            Best Streak
+          </p>
         </div>
       </div>
     </div>
