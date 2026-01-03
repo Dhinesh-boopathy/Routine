@@ -15,7 +15,12 @@ const router = express.Router();
 router.post("/", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-    const { date, completed, total, completedTaskIds = [] } = req.body;
+    const {
+      date,
+      completed,
+      total,
+      completedTaskIds = [],
+    } = req.body;
 
     if (!date || completed == null || total == null) {
       return res.status(400).json({ message: "Missing required fields" });

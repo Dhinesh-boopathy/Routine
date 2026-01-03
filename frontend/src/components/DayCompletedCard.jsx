@@ -12,10 +12,15 @@ export default function DayCompletedCard() {
       {/* Circle */}
       <div
         className={`
-          w-28 h-28 rounded-full flex items-center justify-center
+          w-28 h-28 rounded-full
+          flex items-center justify-center
           bg-green-100 border-4 border-green-500
           transition-all duration-500
-          ${animate ? "scale-100 opacity-100" : "scale-50 opacity-0"}
+          ${
+            animate
+              ? "scale-100 opacity-100"
+              : "scale-50 opacity-0"
+          }
         `}
       >
         {/* Tick */}

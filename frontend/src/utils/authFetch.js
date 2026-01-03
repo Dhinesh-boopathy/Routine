@@ -8,20 +8,19 @@ export async function authFetch(path, options = {}) {
     headers: {
       "Content-Type": "application/json",
       ...(options.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(token
+        ? { Authorization: `Bearer ${token}` }
+        : {}),
     },
   });
 
   // 🔐 CENTRALIZED AUTH HANDLING
   if (res.status === 401) {
-    // Clear ALL auth data
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
     // Force redirect (guarantees Navbar update)
     window.location.href = "/login";
-
-    // Stop further processing
     throw new Error("Unauthorized");
   }
 
@@ -32,4 +31,3 @@ export async function authFetch(path, options = {}) {
 
   return res.json();
 }
- 
