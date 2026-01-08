@@ -1,2 +1,2 @@
 // Base API URL (notice /api included)
-export const API_BASE = "http://localhost:4000";
+export const API_BASE = "https://habitry-backend.onrender.com";

@@ -45,21 +45,25 @@ export default function StreakCard({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow-md p-6
-                 flex flex-col items-center
-                 cursor-pointer hover:shadow-lg transition"
+      className="
+        bg-white dark:bg-slate-800
+        rounded-xl p-6
+        flex flex-col items-center
+        cursor-pointer
+        shadow-md dark:shadow-none
+        hover:shadow-lg dark:hover:bg-slate-700/80
+        transition-all
+      "
     >
       {/* 🌟 GLOW BACKGROUND */}
       <div className="relative w-48 h-48 mb-4 flex items-center justify-center">
         <div
-          className={`absolute w-40 h-40 rounded-full blur-2xl
-                      transition-all duration-500
-                      ${theme.glow}
-                      ${
-                        animateStreak
-                          ? "scale-110 opacity-100"
-                          : "scale-100 opacity-70"
-                      }`}
+          className={`
+            absolute w-40 h-40 rounded-full blur-2xl
+            transition-all duration-500
+            ${theme.glow}
+            ${animateStreak ? "scale-110 opacity-90" : "scale-100 opacity-60"}
+          `}
         />
 
         {/* 🔵 PROGRESS CIRCLE */}
@@ -69,7 +73,7 @@ export default function StreakCard({
             cy="96"
             r={RADIUS}
             strokeWidth="12"
-            className="stroke-slate-200 fill-none"
+            className="stroke-slate-200 dark:stroke-slate-700 fill-none"
           />
           <circle
             cx="96"
@@ -87,10 +91,18 @@ export default function StreakCard({
 
         {/* 🎯 CENTER TEXT */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-          <span className={`text-4xl font-bold ${theme.text}`}>
+          <span
+            className={`
+              text-4xl font-bold
+              ${theme.text}
+              dark:text-blue-400
+            `}
+          >
             {progress}%
           </span>
-          <span className="text-sm text-slate-500 mt-1">
+
+          <span className="text-sm mt-1
+                           text-slate-600 dark:text-slate-300">
             {getMessage()}
           </span>
         </div>
@@ -99,26 +111,35 @@ export default function StreakCard({
       {/* 📊 STATS */}
       <div className="flex gap-6 text-center">
         <div
-          className={`transition-transform duration-300
-                      ${
-                        animateStreak
-                          ? "scale-125 text-orange-600"
-                          : "scale-100"
-                      }`}
+          className={`
+            transition-transform duration-300
+            ${animateStreak ? "scale-125" : "scale-100"}
+          `}
         >
-          <p className="text-lg font-semibold">
+          <p
+            className={`
+              text-lg font-semibold
+              text-slate-800 dark:text-slate-100
+              ${animateStreak ? "text-orange-500" : ""}
+            `}
+          >
             🔥 {streak}
           </p>
-          <p className="text-xs text-slate-500">
+
+          <p className="text-xs
+                        text-slate-500 dark:text-slate-400">
             Current Streak
           </p>
         </div>
 
         <div>
-          <p className="text-lg font-semibold">
+          <p className="text-lg font-semibold
+                        text-slate-800 dark:text-slate-100">
             {bestStreak}
           </p>
-          <p className="text-xs text-slate-500">
+
+          <p className="text-xs
+                        text-slate-500 dark:text-slate-400">
             Best Streak
           </p>
         </div>

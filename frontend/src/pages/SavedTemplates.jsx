@@ -53,8 +53,8 @@ export default function SavedTemplates() {
         method: "DELETE",
       });
 
-      setTemplates((prev) =>
-        prev.filter((t) => t._id !== templateId)
+      setTemplates(prev =>
+        prev.filter(t => t._id !== templateId)
       );
 
       if (selectedTemplate?._id === templateId) {
@@ -69,7 +69,7 @@ export default function SavedTemplates() {
 
   function openTemplate(template) {
     setSelectedTemplate(template);
-    setEditedTasks(template.tasks.map((t) => t.title));
+    setEditedTasks(template.tasks.map(t => t.title));
     setIsEditMode(false);
   }
 
@@ -84,12 +84,12 @@ export default function SavedTemplates() {
     if (!newTask.trim()) return;
     if (editedTasks.length >= MAX_TASKS) return;
 
-    setEditedTasks((prev) => [...prev, newTask]);
+    setEditedTasks(prev => [...prev, newTask]);
     setNewTask("");
   }
 
   function removeTask(index) {
-    setEditedTasks((prev) =>
+    setEditedTasks(prev =>
       prev.filter((_, i) => i !== index)
     );
   }
@@ -103,7 +103,7 @@ export default function SavedTemplates() {
       await authFetch(`/routine/template/${selectedTemplate._id}`, {
         method: "PUT",
         body: JSON.stringify({
-          tasks: editedTasks.map((t) => ({
+          tasks: editedTasks.map(t => ({
             title: t,
             description: "",
           })),
@@ -128,91 +128,103 @@ export default function SavedTemplates() {
 
   if (loading) {
     return (
-      <p className="p-6 text-center text-slate-500">
+      <p className="p-6 text-center text-slate-500 dark:text-slate-400">
         Loading...
       </p>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-slate-100 p-6">
+    <div
+      className="min-h-[calc(100vh-64px)]
+                 bg-slate-100 dark:bg-slate-900
+                 text-slate-800 dark:text-slate-100
+                 p-6"
+    >
       <div className="max-w-3xl mx-auto">
 
-        <h1 className="text-2xl font-bold text-blue-600 mb-6">
+        <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-6">
           Saved Templates
         </h1>
 
-      {templates.length === 0 ? (
-  <div className="bg-white rounded-xl shadow-md p-6 text-center">
-    <p className="text-slate-600 mb-3">
-      You don’t have any saved templates yet.
-    </p>
+        {templates.length === 0 ? (
+          <div
+            className="bg-white dark:bg-slate-800
+                       rounded-xl shadow-md p-6 text-center"
+          >
+            <p className="text-slate-600 dark:text-slate-400 mb-3">
+              You don’t have any saved templates yet.
+            </p>
 
-    <button
-      onClick={() => navigate("/create-routine")}
-      className="px-4 py-2 text-sm font-semibold
-                 bg-blue-600 text-white rounded-lg
-                 hover:bg-blue-700"
-    >
-      Create Your First Template
-    </button>
-  </div>
-) : (
-  templates.map((template) => (
-    <div
-      key={template._id}
-      onClick={() => openTemplate(template)}
-      className="bg-white p-5 rounded-xl shadow-md mb-4
-                 flex items-center justify-between
-                 cursor-pointer hover:shadow-lg transition"
-    >
-      {/* LEFT */}
-      <div>
-        <h3 className="text-lg font-semibold">
-          {template.title}
-        </h3>
-        <p className="text-sm text-slate-500">
-          {template.tasks.length} tasks
-        </p>
-      </div>
+            <button
+              onClick={() => navigate("/create-routine")}
+              className="px-4 py-2 text-sm font-semibold
+                         bg-blue-600 text-white rounded-lg
+                         hover:bg-blue-700"
+            >
+              Create Your First Template
+            </button>
+          </div>
+        ) : (
+          templates.map(template => (
+            <div
+              key={template._id}
+              onClick={() => openTemplate(template)}
+              className="bg-white dark:bg-slate-800
+                         p-5 rounded-xl shadow-md mb-4
+                         flex items-center justify-between
+                         cursor-pointer
+                         hover:shadow-lg transition"
+            >
+              {/* LEFT */}
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {template.title}
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {template.tasks.length} tasks
+                </p>
+              </div>
 
-      {/* RIGHT */}
-      <div className="flex gap-3">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleActivate(template._id);
-          }}
-          className="px-4 py-2 text-sm font-semibold
-                     bg-blue-600 text-white rounded-lg
-                     hover:bg-blue-700"
-        >
-          Set as Default
-        </button>
+              {/* RIGHT */}
+              <div className="flex gap-3">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleActivate(template._id);
+                  }}
+                  className="px-4 py-2 text-sm font-semibold
+                             bg-blue-600 text-white rounded-lg
+                             hover:bg-blue-700"
+                >
+                  Set as Default
+                </button>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete(template._id);
-          }}
-          className="px-4 py-2 text-sm font-semibold
-                     bg-red-100 text-red-600 rounded-lg
-                     hover:bg-red-200"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  ))
-)}
-
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(template._id);
+                  }}
+                  className="px-4 py-2 text-sm font-semibold
+                             bg-red-100 dark:bg-red-900/30
+                             text-red-600 dark:text-red-400
+                             rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* ================= MODAL ================= */}
       {selectedTemplate && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-lg rounded-xl p-6">
-
+          <div
+            className="bg-white dark:bg-slate-800
+                       w-full max-w-lg rounded-xl p-6"
+          >
             <h2 className="text-xl font-bold mb-4">
               Template Tasks ({editedTasks.length}/{MAX_TASKS})
             </h2>
@@ -222,7 +234,8 @@ export default function SavedTemplates() {
                 <li
                   key={index}
                   className="flex justify-between items-center
-                             border px-3 py-2 rounded-lg"
+                             border border-slate-200 dark:border-slate-700
+                             px-3 py-2 rounded-lg"
                 >
                   <span className="text-sm">{task}</span>
 
@@ -250,7 +263,9 @@ export default function SavedTemplates() {
                       : "Add new task"
                   }
                   className="w-full border px-3 py-2 rounded-lg mb-2
-                             disabled:bg-slate-100"
+                             bg-white dark:bg-slate-900
+                             border-slate-300 dark:border-slate-700
+                             disabled:bg-slate-100 dark:disabled:bg-slate-800"
                 />
 
                 {editedTasks.length >= MAX_TASKS && (
@@ -262,7 +277,7 @@ export default function SavedTemplates() {
                 <button
                   onClick={addTask}
                   disabled={editedTasks.length >= MAX_TASKS}
-                  className="text-sm text-blue-600 mb-4"
+                  className="text-sm text-blue-600 dark:text-blue-400 mb-4"
                 >
                   + Add Task
                 </button>
@@ -272,7 +287,8 @@ export default function SavedTemplates() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={closeModal}
-                className="px-4 py-2 text-sm border rounded-lg"
+                className="px-4 py-2 text-sm border rounded-lg
+                           border-slate-300 dark:border-slate-700"
               >
                 Cancel
               </button>
@@ -281,7 +297,8 @@ export default function SavedTemplates() {
                 <>
                   <button
                     onClick={() => setIsEditMode(true)}
-                    className="px-4 py-2 text-sm bg-slate-600 text-white rounded-lg"
+                    className="px-4 py-2 text-sm
+                               bg-slate-600 text-white rounded-lg"
                   >
                     Edit
                   </button>
@@ -290,7 +307,8 @@ export default function SavedTemplates() {
                     onClick={() =>
                       saveTemplate({ setAsDefault: true })
                     }
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg"
+                    className="px-4 py-2 text-sm
+                               bg-blue-600 text-white rounded-lg"
                   >
                     Set as Default
                   </button>
@@ -302,7 +320,8 @@ export default function SavedTemplates() {
                     onClick={() =>
                       saveTemplate({ setAsDefault: false })
                     }
-                    className="px-4 py-2 text-sm bg-slate-600 text-white rounded-lg"
+                    className="px-4 py-2 text-sm
+                               bg-slate-600 text-white rounded-lg"
                   >
                     Save
                   </button>
@@ -312,7 +331,8 @@ export default function SavedTemplates() {
                     onClick={() =>
                       saveTemplate({ setAsDefault: true })
                     }
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg"
+                    className="px-4 py-2 text-sm
+                               bg-blue-600 text-white rounded-lg"
                   >
                     Save & Set as Default
                   </button>

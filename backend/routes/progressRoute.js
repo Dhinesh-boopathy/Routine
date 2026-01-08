@@ -6,12 +6,74 @@ import { requireAuth } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/**
- * ---------------------------------------------------------
- * POST /progress
- * Save or update DAILY progress (PER USER)
- * ---------------------------------------------------------
- */
+/* ---------------------------------------------------------
+   GET /progress/today
+   Restore TODAY progress (task-level)
+--------------------------------------------------------- */
+router.get("/today", requireAuth, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const date = new Date().toISOString().split("T")[0];
+
+    const progress = await DailyProgress.findOne({ userId, date });
+
+    res.json(
+      progress || {
+        date,
+        completedTaskIds: [],
+        completed: 0,
+        total: 0,
+      }
+    );
+  } catch (err) {
+    console.error("Fetch today progress error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ---------------------------------------------------------
+   POST /progress/today
+   Save TODAY progress (partial allowed)
+   🔒 Only TODAY can be modified
+--------------------------------------------------------- */
+router.post("/today", requireAuth, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { date, completedTaskIds = [], total } = req.body;
+
+    if (!date || !Array.isArray(completedTaskIds)) {
+      return res.status(400).json({ message: "Invalid payload" });
+    }
+
+    // 🔒 ENFORCE TODAY ONLY
+    const today = new Date().toISOString().split("T")[0];
+    if (date !== today) {
+      return res.status(403).json({
+        message: "Only today's progress can be modified",
+      });
+    }
+
+    const progress = await DailyProgress.findOneAndUpdate(
+      { userId, date },
+      {
+        completedTaskIds,
+        completed: completedTaskIds.length,
+        total,
+      },
+      { upsert: true, new: true }
+    );
+
+    res.json(progress);
+  } catch (err) {
+    console.error("Save today progress error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ---------------------------------------------------------
+   POST /progress
+   Save FINAL day summary (used when day completed)
+--------------------------------------------------------- */
 router.post("/", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
@@ -26,15 +88,9 @@ router.post("/", requireAuth, async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid userId" });
-    }
-
     const progress = await DailyProgress.findOneAndUpdate(
       { userId, date },
       {
-        userId,
-        date,
         completed,
         total,
         completedTaskIds,
@@ -49,12 +105,10 @@ router.post("/", requireAuth, async (req, res) => {
   }
 });
 
-/**
- * ---------------------------------------------------------
- * GET /progress/month
- * Fetch MONTHLY progress (CALENDAR VIEW) – PER USER
- * ---------------------------------------------------------
- */
+/* ---------------------------------------------------------
+   GET /progress/month
+   Return per-day progress INCLUDING task-level data
+--------------------------------------------------------- */
 router.get("/month", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
@@ -62,10 +116,6 @@ router.get("/month", requireAuth, async (req, res) => {
 
     if (!year || !month) {
       return res.status(400).json({ message: "Year and month required" });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid userId" });
     }
 
     const monthStr = month.toString().padStart(2, "0");
@@ -82,6 +132,7 @@ router.get("/month", requireAuth, async (req, res) => {
       result[r.date] = {
         completed: r.completed,
         total: r.total,
+        completedTaskIds: r.completedTaskIds || [],
       };
     });
 
@@ -92,19 +143,12 @@ router.get("/month", requireAuth, async (req, res) => {
   }
 });
 
-/**
- * ---------------------------------------------------------
- * GET /progress/streaks
- * Fetch CURRENT & BEST streak – PER USER
- * ---------------------------------------------------------
- */
+/* ---------------------------------------------------------
+   GET /progress/streaks
+--------------------------------------------------------- */
 router.get("/streaks", requireAuth, async (req, res) => {
   try {
     const userId = req.userId;
-
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid userId" });
-    }
 
     const progress = await DailyProgress.find(
       { userId },
